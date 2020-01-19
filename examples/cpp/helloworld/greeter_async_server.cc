@@ -100,6 +100,16 @@ class ServerImpl final {
         // part of its FINISH state.
         new CallData(service_, cq_);
 
+        auto channel = grpc::CreateChannel("127.0.0.1:7000", grpc::InsecureChannelCredentials());
+        auto stub = Greeter::NewStub(channel);
+        grpc::CompletionQueue queue;
+        auto clientContext = grpc::ClientContext::FromServerContext(ctx_);
+        HelloRequest req;
+        // This is going to crash
+        std::cout << "!!! About to crash" << std::endl;
+        stub->PrepareAsyncSayHello(clientContext.get(), req, &queue);
+        std::cout << "!!! After crash" << std::endl;
+
         // The actual processing.
         std::string prefix("Hello ");
         reply_.set_message(prefix + request_.name());

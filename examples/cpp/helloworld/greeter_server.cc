@@ -41,6 +41,17 @@ class GreeterServiceImpl final : public Greeter::Service {
   Status SayHello(ServerContext* context, const HelloRequest* request,
                   HelloReply* reply) override {
     std::string prefix("Hello ");
+
+    auto channel = grpc::CreateChannel("127.0.0.1:7000", grpc::InsecureChannelCredentials());
+    auto stub = Greeter::NewStub(channel);
+    grpc::CompletionQueue queue;
+    auto clientContext = grpc::ClientContext::FromServerContext(*context);
+    HelloRequest req;
+    // This is going to crash
+    std::cout << "!!! About to crash" << std::endl;
+    stub->PrepareAsyncSayHello(clientContext.get(), req, &queue);
+    std::cout << "!!! After crash" << std::endl;
+    
     reply->set_message(prefix + request->name());
     return Status::OK;
   }
